@@ -5,8 +5,8 @@ from PIL import Image, ImageDraw, ImageFont
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load model checkpoint
-checkpoint = 'checkpoint_ssd300.pth.tar'
-checkpoint = torch.load(checkpoint)
+checkpoint = '/work/vq218944/MSAI/Models/checkpoint_ssd300.pth.tar'
+checkpoint = torch.load(checkpoint, map_location=device)
 start_epoch = checkpoint['epoch'] + 1
 print('\nLoaded checkpoint from epoch %d.\n' % start_epoch)
 model = checkpoint['model']
@@ -45,6 +45,8 @@ def detect(original_image, min_score, max_overlap, top_k, suppress=None):
     det_boxes, det_labels, det_scores = model.detect_objects(predicted_locs, predicted_scores, min_score=min_score,
                                                              max_overlap=max_overlap, top_k=top_k)
 
+
+    print(det_labels)
     # Move detections to the CPU
     det_boxes = det_boxes[0].to('cpu')
 
@@ -64,7 +66,7 @@ def detect(original_image, min_score, max_overlap, top_k, suppress=None):
     # Annotate
     annotated_image = original_image
     draw = ImageDraw.Draw(annotated_image)
-    font = ImageFont.truetype("./calibril.ttf", 15)
+    font = ImageFont.load_default()
 
     # Suppress specific classes, if needed
     for i in range(det_boxes.size(0)):
@@ -96,7 +98,7 @@ def detect(original_image, min_score, max_overlap, top_k, suppress=None):
 
 
 if __name__ == '__main__':
-    img_path = '/media/ssd/ssd data/VOC2007/JPEGImages/000001.jpg'
+    img_path = '/work/vq218944/MSAI/ExDarkVOC/JPEGImages/2015_07293.jpg'
     original_image = Image.open(img_path, mode='r')
     original_image = original_image.convert('RGB')
-    detect(original_image, min_score=0.2, max_overlap=0.5, top_k=200).show()
+    detect(original_image, min_score=0.2, max_overlap=0.5, top_k=5).save("detected.jpg", "JPEG")

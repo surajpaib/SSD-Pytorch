@@ -7,36 +7,36 @@ from pprint import PrettyPrinter
 pp = PrettyPrinter()
 
 # Parameters
-data_folder = './'
 keep_difficult = True  # difficult ground truth objects must always be considered in mAP calculation, because these objects DO exist!
 batch_size = 64
 workers = 4
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-checkpoint = './checkpoint_ssd300.pth.tar'
-
-# Load model checkpoint that is to be evaluated
-checkpoint = torch.load(checkpoint)
-model = checkpoint['model']
-model = model.to(device)
-
-# Switch to eval mode
-model.eval()
-
-# Load test data
-test_dataset = PascalVOCDataset(data_folder,
-                                split='test',
-                                keep_difficult=keep_difficult)
-test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False,
-                                          collate_fn=test_dataset.collate_fn, num_workers=workers, pin_memory=True)
 
 
-def evaluate(test_loader, model):
+def evaluate(args):
     """
     Evaluate.
 
     :param test_loader: DataLoader for test data
     :param model: model
     """
+
+    # Load model checkpoint that is to be evaluated
+
+    checkpoint = torch.load(args.checkpoint, map_location=device)
+    model = checkpoint['model']
+    model = model.to(device)
+
+    # Load test data
+
+    test_dataset = PascalVOCDataset(args.data_folder,
+                                    split='test',
+                                    keep_difficult=keep_difficult)
+
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False,
+                                            collate_fn=test_dataset.collate_fn, num_workers=workers, pin_memory=True)
+
+
 
     # Make sure it's in eval mode
     model.eval()
@@ -52,6 +52,7 @@ def evaluate(test_loader, model):
     with torch.no_grad():
         # Batches
         for i, (images, boxes, labels, difficulties) in enumerate(tqdm(test_loader, desc='Evaluating')):
+
             images = images.to(device)  # (N, 3, 300, 300)
 
             # Forward prop.
@@ -59,7 +60,7 @@ def evaluate(test_loader, model):
 
             # Detect objects in SSD output
             det_boxes_batch, det_labels_batch, det_scores_batch = model.detect_objects(predicted_locs, predicted_scores,
-                                                                                       min_score=0.01, max_overlap=0.45,
+                                                                                       min_score=args.min_score, max_overlap=0.45,
                                                                                        top_k=200)
             # Evaluation MUST be at min_score=0.01, max_overlap=0.45, top_k=200 for fair comparision with the paper's results and other repos
 
@@ -74,15 +75,22 @@ def evaluate(test_loader, model):
             true_boxes.extend(boxes)
             true_labels.extend(labels)
             true_difficulties.extend(difficulties)
-
-        # Calculate mAP
-        APs, mAP = calculate_mAP(det_boxes, det_labels, det_scores, true_boxes, true_labels, true_difficulties)
-
+            # Calculate mAP
+            APs = calculate_mAP(det_boxes, det_labels, det_scores, true_boxes, true_labels, true_difficulties)
+ 
     # Print AP for each class
     pp.pprint(APs)
 
-    print('\nMean Average Precision (mAP): %.3f' % mAP)
 
 
 if __name__ == '__main__':
-    evaluate(test_loader, model)
+    import argparse
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--min_score", help="Min score @ eval", default=0.01, type=float)
+    parser.add_argument("--checkpoint", help="Model checkpoint for eval", default="/work/vq218944/MSAI/Models/checkpoint_ssd300.pth.tar")
+    parser.add_argument("--data_folder", help="Folder with train_objects and train_images json", default='/work/vq218944/MSAI/ssd_jsons/VOC')
+
+    args = parser.parse_args()  
+
+    evaluate(args)

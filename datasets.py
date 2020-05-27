@@ -40,6 +40,10 @@ class PascalVOCDataset(Dataset):
         # Read objects in this image (bounding boxes, labels, difficulties)
         objects = self.objects[i]
         boxes = torch.FloatTensor(objects['boxes'])  # (n_objects, 4)
+        
+        if boxes.size()[0] == 0:
+            return None
+
         labels = torch.LongTensor(objects['labels'])  # (n_objects)
         difficulties = torch.ByteTensor(objects['difficulties'])  # (n_objects)
 
@@ -53,6 +57,7 @@ class PascalVOCDataset(Dataset):
         image, boxes, labels, difficulties = transform(image, boxes, labels, difficulties, split=self.split)
 
         return image, boxes, labels, difficulties
+   
 
     def __len__(self):
         return len(self.images)
@@ -68,7 +73,8 @@ class PascalVOCDataset(Dataset):
         :param batch: an iterable of N sets from __getitem__()
         :return: a tensor of images, lists of varying-size tensors of bounding boxes, labels, and difficulties
         """
-
+        batch = filter (lambda x:x is not None, batch)
+        
         images = list()
         boxes = list()
         labels = list()
