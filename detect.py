@@ -98,7 +98,16 @@ def detect(original_image, min_score, max_overlap, top_k, suppress=None):
 
 
 if __name__ == '__main__':
-    img_path = '/work/vq218944/MSAI/ExDarkVOC/JPEGImages/2015_07293.jpg'
-    original_image = Image.open(img_path, mode='r')
+    import argparse
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--img_path", help="Path to image to run the detection on", type=str)
+    parser.add_argument("--min_score", help="Minimum confidence score for prediction", type=float, default=0.2)
+    parser.add_argument("--id", help="Identifier to add to the image save name", type=str, default="")
+
+    args = parser.parse_args()  
+
+    original_image = Image.open(args.img_path, mode='r')
     original_image = original_image.convert('RGB')
-    detect(original_image, min_score=0.2, max_overlap=0.5, top_k=5).save("detected.jpg", "JPEG")
+    annotated_image = detect(original_image, min_score=args.min_score, max_overlap=0.5, top_k=5)
+    annotated_image.save("{}_{}_detected.jpg".format(args.img_path.split("/")[-1].split(".")[0], args.id), "jpeg")
