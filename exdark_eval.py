@@ -21,10 +21,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def evaluate(args):
     """
-    Evaluate.
-
-    :param test_loader: DataLoader for test data
-    :param model: model
+    Evaluation scripts for exdark data. Refer to argparse arguments at teh end of the script
     """
 
     # Load model checkpoint that is to be evaluated
@@ -108,9 +105,10 @@ def evaluate(args):
                 true_difficulties.extend(difficulties)
             
             
-            # Calculate mAP
+            # Calculate aP for exdark and add to dictionary with lighting condition.
             APs = calculate_mAP_exdark(det_boxes, det_labels, det_scores, true_boxes, true_labels, true_difficulties)
             APs["lighting"] = lighting_states[state_idx]
+        
         # Print AP for each class
         pp.pprint(APs)
 
@@ -132,12 +130,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--min_score", help="Min score @ eval", default=0.01, type=float)
+    
+    # SSD checkpoint as downloaded in the setting up ssd section
     parser.add_argument("--checkpoint", help="Model checkpoint for eval", default="/work/vq218944/MSAI/Models/checkpoint_ssd300.pth.tar")
-    parser.add_argument("--data_folder", help="Folder with train_objects and train_images json", default='SSD_ExDark')
+    
+    # Path to the generated json files from the previous step
+    parser.add_argument("--data_folder", help="Folder with train_objects and train_images json", default='/work/vq218944/MSAI/ssd_jsons/SSD_ExDark')
+    
+    # The imageclasslist.txt file downloaded for enlightenGAN trainval processing. This file also contains information about lighting conditions and class distributions
     parser.add_argument("--exdark_metadata", help="txt file with metadata for ExDark", default='/work/vq218944/MSAI/imageclasslist.txt')
 
     args = parser.parse_args()  
-
-    args.data_folder = "/work/vq218944/MSAI/ssd_jsons/{}".format(args.data_folder)
 
     evaluate(args)

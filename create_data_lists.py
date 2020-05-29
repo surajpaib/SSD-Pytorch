@@ -13,8 +13,14 @@ def main(args):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", help="Either VOC or ExDark", default="voc")
+
+    # Keep as exdark
+    parser.add_argument("--mode", help="Either VOC or ExDark", default="exdark")
+
+    # Provide the path to the VOC dataset to convert to the json format
     parser.add_argument("--voc_path", help="Path to VOC dataset, trainval+test", default="/work/vq218944/MSAI/VOCdevkit/VOC2007")
+    
+    # The path to store these jsons. This needs to be provided to the next step of the evaluation process.
     parser.add_argument("--output_path", help="Path to save output", default="/work/vq218944/MSAI/")
 
     args = parser.parse_args()

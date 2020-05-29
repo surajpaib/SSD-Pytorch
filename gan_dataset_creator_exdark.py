@@ -83,6 +83,8 @@ def detect(image_path, args, mode='train'):
     font = ImageFont.load_default()
 
     # Suppress specific classes, if needed
+    # For each object detected, copy the image to directory corresponding to that object/label
+
     for i in range(det_boxes.size(0)):
         if args.suppress is not None:
             if det_labels[i] in args.suppress:
@@ -130,7 +132,7 @@ if __name__ == '__main__':
     model.eval()
 
 
-    # Create subfolders for each label
+    # Create subfolders for each label ( all the objects present in the dataset )
     for label in exdark_labels:
         if not(os.path.exists("{}/train_{}/{}".format(args.output_path, args.tag, label))):
             os.mkdir("{}/train_{}/{}".format(args.output_path, args.tag, label))
@@ -153,7 +155,7 @@ if __name__ == '__main__':
     train_files = files[:int(len(files)*args.split)]
     test_files = files[int(len(files)*args.split):]
 
-
+    # Detect over the train and test files and copy images to folders corresponding to the objects detected. 
     print("\n Loading Train Detections")
     for fn in tqdm(train_files):
         detect(fn, args, mode='train')
