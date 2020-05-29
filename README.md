@@ -37,12 +37,19 @@ The detected image should be saved in this folder with a _detection suffix added
 
 ## Running evaluation with SSD. 
 
+Before running the evaluations for VOC formatted datasets, the ```create_data_lists.py``` script is run which processed all the VOC annotations and images and stores them in multiple json files. Once these json files are obtained the ```exdark_eval.py``` file can be run. This file contains code specific to running ExDark formatted voc datasets and features to group the results by lighting conditions. The results are saved in a easy to use csv format. More details about changes are explained in code walkthrough.
 
+The process followed to quantitatively evaluate different enhancement methods are as follows,
+1. A copy of the original ExDark dataset folder (in VOC format) is created.
+2. The original images in the copy are replaced by enhanced images using ```copy_enlighten_generated_files()``` in the ```Tools/util_fns.py```. 
+3. The dataset copy is provided to the ```exdark_eval.py``` script and this calculates the quantitative metrics as presented in the report. 
 
 ## Testing sample detections with SSD
-
+To test sample detections with SSD without evaluation, the ```detect.py``` script can used as mentioned above.
 
 ## Code Walkthrough
+This codebase was heavily modified to allow for different functionalities on the ExDark dataset. The ```exdark_eval.py``` script was created from the ```eval.py``` script but with different AP calculation functions and additional features not present in ```eval.py```. The ```eval.py``` was also cleaned up for easier usage. The AP calculation used in ```exdark_eval.py``` is implemented from line 292 onwards in the ```utils.py``` script. Several modifications are made to allow the change in labels and object mappings programmed in the ```utils.py`` script. This script was analyzed completely to make these changes and multiple smaller changes are made throughout the script.
+
 
 
 

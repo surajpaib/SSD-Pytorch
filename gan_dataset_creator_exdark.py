@@ -97,13 +97,21 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
 
+    
     parser.add_argument("--exdark_images_path", help="Path to Exdark images", default="/work/vq218944/MSAI/ExDarkVOC/JPEGImages")
+    
+    # A folder needs to be created where the output data is saved
     parser.add_argument("--output_path", help="Output data path", default="/work/vq218944/MSAI/EnlightenGAN_Data")
+    # tag A meaning source data
     parser.add_argument("--tag", help="GAN dataset tag", default="A")
+    # Train-test split for the GAN itself
     parser.add_argument("--split", help="Train-test split", default=0.8)
+    # SSD model for detections
     parser.add_argument("--checkpoint", help="Model Checkpoint", default='/work/vq218944/MSAI/Models/checkpoint_ssd300.pth.tar')
+    # Trainval file containing of list of images to use
     parser.add_argument("--trainvalfile", help="File with trainval list of images", default='/work/vq218944/MSAI/ExDarkVOC/ImageSets/Main/trainval.txt')
     
+    # Detection parameters. A low score is set to get more instances.
     parser.add_argument("--min_score", help="Min score for detection", default=0.2, type=float)
     parser.add_argument("--max_overlap", help="Max overlap for NMS", default=0.5, type=float)
     parser.add_argument("--top_k", help="Max overlap for NMS", default=5, type=int)
