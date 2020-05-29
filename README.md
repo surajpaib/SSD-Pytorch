@@ -48,7 +48,11 @@ The process followed to quantitatively evaluate different enhancement methods ar
 To test sample detections with SSD without evaluation, the ```detect.py``` script can used as mentioned above.
 
 ## Code Walkthrough
-This codebase was heavily modified to allow for different functionalities on the ExDark dataset. The ```exdark_eval.py``` script was created from the ```eval.py``` script but with different AP calculation functions and additional features not present in ```eval.py```. The ```eval.py``` was also cleaned up for easier usage. The AP calculation used in ```exdark_eval.py``` is implemented from line 292 onwards in the ```utils.py``` script. Several modifications are made to allow the change in labels and object mappings programmed in the ```utils.py`` script. This script was analyzed completely to make these changes and multiple smaller changes are made throughout the script.
+This codebase was heavily modified to allow for different functionalities on the ExDark dataset. 
+1. The ```exdark_eval.py``` script was created from the ```eval.py``` script but with different AP calculation functions and additional features not present in ```eval.py```. 
+2. The ```eval.py``` was also cleaned up for easier usage with argparse 
+3. The AP calculation used in ```exdark_eval.py``` is implemented from line 292 onwards in the ```utils.py``` script. Several modifications are made to allow the change in labels and object mappings programmed in the ```utils.py`` script. 
+4. Smaller changes are made throughout the script to parse annotations and create data lists.
 
 
 
