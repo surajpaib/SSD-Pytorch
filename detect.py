@@ -4,14 +4,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Load model checkpoint
-checkpoint = '/work/vq218944/MSAI/Models/checkpoint_ssd300.pth.tar'
-checkpoint = torch.load(checkpoint, map_location=device)
-start_epoch = checkpoint['epoch'] + 1
-print('\nLoaded checkpoint from epoch %d.\n' % start_epoch)
-model = checkpoint['model']
-model = model.to(device)
-model.eval()
+
 
 # Transforms
 resize = transforms.Resize((300, 300))
@@ -20,7 +13,7 @@ normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                  std=[0.229, 0.224, 0.225])
 
 
-def detect(original_image, min_score, max_overlap, top_k, suppress=None):
+def detect(model, original_image, min_score, max_overlap, top_k, suppress=None):
     """
     Detect objects in an image with a trained SSD300, and visualize the results.
 
@@ -104,10 +97,17 @@ if __name__ == '__main__':
     parser.add_argument("--img_path", help="Path to image to run the detection on", type=str)
     parser.add_argument("--min_score", help="Minimum confidence score for prediction", type=float, default=0.2)
     parser.add_argument("--id", help="Identifier to add to the image save name", type=str, default="")
+    parser.add_argument("--checkpoint", help="Model checkpoint for eval", default="/work/vq218944/MSAI/Models/checkpoint_ssd300.pth.tar")
 
     args = parser.parse_args()  
 
+    # Load model checkpoint
+    checkpoint = torch.load(args.checkpoint, map_location=device)
+    model = checkpoint['model']
+    model = model.to(device)
+    model.eval()
+
     original_image = Image.open(args.img_path, mode='r')
     original_image = original_image.convert('RGB')
-    annotated_image = detect(original_image, min_score=args.min_score, max_overlap=0.5, top_k=5)
+    annotated_image = detect(model, original_image, min_score=args.min_score, max_overlap=0.5, top_k=5)
     annotated_image.save("{}_{}_detected.jpg".format(args.img_path.split("/")[-1].split(".")[0], args.id), "jpeg")

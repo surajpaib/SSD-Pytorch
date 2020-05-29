@@ -11,6 +11,11 @@ from tqdm import tqdm
 from glob import glob
 from random import shuffle
 import shutil
+import sys
+
+sys.path.append('..')
+sys.path.append('SSD-Pytorch')
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
